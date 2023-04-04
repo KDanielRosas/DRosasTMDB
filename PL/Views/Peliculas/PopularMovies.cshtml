@@ -1,0 +1,33 @@
+﻿@model PL.Models.Movie
+@{
+    ViewData["Title"] = "PopularMovies";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Peliculas más populares</h1>
+<hr />
+
+<div class="container">
+        @foreach (PL.Models.Movie item in Model.Movies)
+        {
+        <div class="card border-dark mb-10" style="max-width: 100%;">
+            <div class="row g-0">
+                <div class="col-md-2">
+                    <img src="@item.Imagen" class="img-fluid rounded-start" alt="..." style="width:100%; height:100%">
+                </div>
+                <div class="col-md-10">
+                    <div class="card-body" style="height:80%">
+                        <h5 class="card-title">@item.Titulo</h5>
+                        <p class="card-text">@item.Descripcion</p>                         
+                    </div>
+                    <div style="text-align:end; width:97%">
+                        <a href="@Url.ActionLink("AddFavorite","Peliculas", new { IdMovie = item.Id })" 
+                        class="btn btn-primary">Añadir a favoritos</a>
+                    </div>                    
+                </div>                
+            </div>
+        </div>
+        <br />
+    }   
+</div>
+
