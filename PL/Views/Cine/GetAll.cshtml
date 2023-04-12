@@ -1,0 +1,68 @@
+﻿@model ML.Result
+@{
+    ViewData["Title"] = "GetAll";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2>Cine</h2>
+        </div>
+        <div class="col" style="text-align:end" vertical-align:central">
+            @Html.ActionLink("Agregar", "Form", "Cine", htmlAttributes: new { @class = "btn btn-success" })
+        </div>
+        <p>Presione el boton de "Agregar" si desea registrar un nuevo cine.</p>
+        <hr />
+    </div>
+
+    <div class="row">
+        @if (Model.Objects != null)
+        {
+            <table class="table table-bordered table-responsive" id="tbCine">
+                <thead>
+                    <tr>
+                        <td class="text-center" style="font-weight:bold;">Editar</td>
+                        <td class="visually-hidden">IdCine</td>
+                        <td class="text-center" style="font-weight:bold;">Latitud</td>
+                        <td class="text-center" style="font-weight:bold;">Longitud</td>
+                        <td class="text-center" style="font-weight:bold;">Dirección</td>
+                        <td class="text-center" style="font-weight:bold;">Venta</td>
+                        <td class="text-center" style="font-weight:bold;">Zona</td>
+                        <td class="text-center" style="font-weight:bold;">Eliminar</td>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (ML.Cine cine in Model.Objects)
+                    {
+                        <tr>
+                            <td class="text-center"><a class="btn btn-warning"
+                            href="@Url.Action("Form", "Cine",
+                            new { IdCine = cine.IdCine })"><i class="fa-regular fa-pen-to-square"></i></a>
+                            </td>
+
+                            <td class="visually-hidden">@cine.IdCine</td>
+                            <td>@cine.Latitud</td>
+                            <td>@cine.Longitud</td>
+                            <td>@cine.Direccion</td>
+                            <td>@cine.Venta</td>
+                            <td>@cine.Zona.Nombre</td>
+
+                            <td class="text-center"><a class="btn btn-danger"
+                            href="@Url.Action("Delete","Cine",
+                            new { IdCine = cine.IdCine })"><i class="fa-solid fa-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-danger" role="alert">No hay registros que mostrar</div>
+        }
+    </div>
+
+</div> <!-- container -->
+

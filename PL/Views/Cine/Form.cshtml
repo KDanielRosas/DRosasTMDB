@@ -1,0 +1,203 @@
+﻿@model ML.Cine
+@{
+    ViewData["Title"] = "Form";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<head>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    
+    <script type="text/javascript">
+        var src = 'https://developers.google.com/maps/documentation/javascript/examples/kml/westcampus.kml';
+        var cdmx;
+        // Inicializar el mapa
+        function initMap() {
+            // Ubicacion inicial
+            if ($("#txtLatitud").val() == 0 && $("#txtLongitud").val() == 0)
+            {
+                cdmx = { lat: 19.42858178716292, lng: -99.1358014290118 };
+            }
+            else
+            {
+                cdmx = { lat: parseFloat($("#txtLatitud").val()), lng: parseFloat($("#txtLongitud").val()) };
+            }
+            
+            // Mapa centrado
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 13,
+                center: cdmx,
+            });
+
+            let infoWindow = new google.maps.InfoWindow({
+                content: "Clic en el mapa para ubicar el punto de venta.",
+                position: cdmx,
+            });
+
+            infoWindow.open(map);
+            var geocoder = new google.maps.Geocoder();
+            map.addListener("click", (mapsMouseEvent) => {
+                infoWindow.close();
+                infoWindow = new google.maps.InfoWindow({
+                    position: mapsMouseEvent.latLng,
+                });
+                $("#txtLatitud").val(mapsMouseEvent.latLng.lat());
+                $("#txtLongitud").val(mapsMouseEvent.latLng.lng());
+                var latitud = mapsMouseEvent.latLng.lat();
+                var longitud = mapsMouseEvent.latLng.lng();
+                var latlng = { lat: latitud, lng: longitud };
+
+                const geocoder = new google.maps.Geocoder();
+
+                geocoder
+                    .geocode({ location: latlng })
+                    .then((response) => {
+                        $("#txtDireccion").val(response.results[0].formatted_address)
+                    })
+
+                infoWindow.setContent(
+                    "Ubicar cine aquí: " + 
+                    JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
+                );
+                infoWindow.open(map);
+            });
+
+        }
+        window.initMap = initMap;
+
+        function Enviar() {
+            var cine = {
+                IdCine: $('#txtIdCine').val(),
+                Latitud: $('#txtLatitud').val(),
+                Longitud: $('#txtLongitud').val(),
+                Direccion: $('#txtDireccion').val(),
+                Venta: $('#txtVenta').val(),
+                Zona: {
+                    IdZona: $("#ddlZona").val()
+                }
+            }
+
+            if (cine.IdCine == 0) {
+                Add(cine);
+            }
+            else {
+                Update(cine);
+            }
+        }
+
+        function Add(cine){
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:5213/Cine/Form',
+                data: cine,
+                success: function(result){
+                    alert('Registro exitoso');
+                    window.location.href = "http://localhost:5213/Cine/GetAll";
+                },
+                error: function (result) {
+                    alert('Error al agregar el registro.');
+                }
+            });
+        };
+
+        function Update(cine){
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:5213/Cine/Form',
+                data: cine,
+                success: function(result){
+                    alert('Registro actualizado correctamente');
+                    window.location.href = "http://localhost:5213/Cine/GetAll";
+                },
+                error: function(result){
+                    alert('Error al actualizar.');
+                }
+            });
+        };
+
+
+    </script>
+
+</head>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2>Cine</h2>
+        </div>
+        <div class="col" style="text-align:end">
+            @Html.ActionLink("Regresar", "GetAll", "Cine", htmlAttributes: new { @class = "btn btn-danger" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+
+            <div>
+                @Html.LabelFor(model => model.IdCine, new { @class = "visually-hidden" })
+                @Html.TextBoxFor(model => model.IdCine, new { @class = "visually-hidden", @id = "txtIdCine" })
+                @Html.ValidationMessageFor(model => model.IdCine)
+            </div>
+
+            <div class="row">
+                <br />
+                <div class="col">
+                    @Html.LabelFor(model => model.Latitud)
+                    <div class="input-group">
+                        @Html.TextBoxFor(model => model.Latitud, new { @class = "form-control", @disabled = "true", @id = "txtLatitud" })
+                        @Html.ValidationMessageFor(model => model.Latitud)
+                    </div>   
+                </div>
+
+                <div class="col">
+                    @Html.LabelFor(model => model.Longitud)
+                    <div class="input-group">
+                        @Html.TextBoxFor(model => model.Longitud, new { @class = "form-control", @disabled = "true", @id = "txtLongitud" })
+                    </div>
+                </div>
+
+                <div class="col">
+                    @Html.LabelFor(model => model.Direccion)
+                    <div class="input-group">
+                        @Html.TextBoxFor(model => model.Direccion, new { @class = "form-control", @disabled = "true", @id = "txtDireccion" })
+                    </div>
+                </div>
+
+                <div class="col">
+                    @Html.LabelFor(model => model.Venta)
+                    <div class="input-group">
+                        @Html.TextBoxFor(model => model.Venta, new { @class = "form-control", @id = "txtVenta" })
+                    </div>
+                </div>
+
+                <div class="col">
+                    @Html.LabelFor(model => model.Zona)
+                    <div class="input-group">
+                        @Html.DropDownListFor(model => model.Zona.IdZona, 
+                            new SelectList(Model.Zona.Zonas, "IdZona","Nombre"),
+                        "Selecciona una zona", new { @class = "form-control", @id = "ddlZona" })
+                    </div>
+                </div>
+
+            </div>
+
+            <br />
+            <div class="row" style="text-align:end">                    
+                <div class="col">
+                    <input type="submit" value="Guardar" class="btn btn-success" onclick="Enviar()" />
+                </div>          
+            </div>
+            
+
+        </div>
+    </div>
+    <hr />
+    <h2>Seleccione en el mapa la ubicación del cine a agregar</h2>
+    <br />
+
+    <div id="map" style="width:100%; height:400px"></div>
+    <div id="capture"></div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCSKBDdPPlfca_zTwyxKiicRQn1qfgRjLw&callback=initMap&v=weekly"
+            defer></script>
+
+</div> <!-- container -->
